@@ -1,9 +1,11 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<unistd.h>
+#include<string.h>
 #include<mysql/mysql.h>
 #include"mysqlCon.h"
 #include"sqlHandle.h"
+void UserLogin();
 void UIDisplay();
 void UIGoods();
 void UICost();
@@ -12,9 +14,11 @@ void GoodsUpdate();
 void GoodsDelete();
 void GoodsSelect();
 MYSQL mysql;
+User user;
 int main(){
 	int n;
 	while(1){
+		UserLogin();
 		UIDisplay();
 		printf("请输入你想要选择的编号\n");
 		scanf("%d",&n);
@@ -31,9 +35,36 @@ int main(){
 	}
 	return 0;
 }
+void UserLogin(){
+	while(1){
+		printf("请输入你的用户名：");
+		scanf("%s",user.user);
+		getchar();
+		printf("请输入你的密码：");
+		scanf("%s",user.passwd);
+		MysqlCon(&mysql);
+		SetEncoding(&mysql);
+		if(Login(&mysql,&user)){
+			printf("登录成功\n");
+			printf("用户权限%s\n\n\n\n",user.power);
+			break;
+		}
+		printf("用户名密码错误，请重新输入！\n");
+
+		MysqlClose(&mysql);
+	}
+}
 void UIDisplay(){
-	printf("/***********商店管理系统*****************/\n");
-	printf("1.进入商品表界面          2.进入销售表界面\n");
+	if(strcmp(user.power,"admin")==0){
+		printf("/***********商店管理系统*****************/\n");
+		printf("1.进入商品表界面          2.进入销售表界面\n");
+		printf("3.添加新的普通用户        4.删除普通用户\n");
+		printf("				5.退出程序\n");
+	}
+	else{
+		printf("/***********商店管理系统*****************/\n");
+		printf("1.进入商品表界面                2.退出程序\n");
+	}
 }
 void UIGoods(){
 	int c;
@@ -83,7 +114,6 @@ void GoodsInsert(){
 	scanf("%f",&g.price);
 	printf("商品所剩数量：");
 	scanf("%d",&g.count);
-	//printf("%d",g.price);
 	MysqlCon(&mysql);
 	SetEncoding(&mysql);
 	Insert(&mysql,&g);

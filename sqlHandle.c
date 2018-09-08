@@ -1,8 +1,31 @@
 #include<stdio.h>
+#include<string.h>
+#include<unistd.h>
+#include<stdlib.h>
 #include"sqlHandle.h"
 
 void SetEncoding(MYSQL* mysql){
 	mysql_query(mysql,"set names utf8");
+}
+int Login(MYSQL* mysql,User* user){
+	char sql[1024];
+	sprintf(sql,"select * from User where username='%s' and password=md5('%s')",user->user,user->passwd);
+	if(mysql_query(mysql,sql)){
+		fprintf(stderr,"Failed Login: Error: %s\n",mysql_error(mysql));
+		exit(1);
+	}
+	else{
+		MYSQL_RES* res=mysql_store_result(mysql);
+		MYSQL_ROW row;
+		if(row=mysql_fetch_row(res)){
+			strcpy(user->power,row[3]);
+			return 1;
+		}
+		else{
+			return 0;
+		}
+	}
+
 }
 void Insert(MYSQL* mysql,goods* g){
 	char sql[1024];

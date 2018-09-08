@@ -11,14 +11,14 @@ typedef struct {
 typedef struct{
 	char user[20];
 	char passwd[20];
-	int power;
+	char power[10];
 }User;
 //设置数据库编码
 void SetEncoding(MYSQL* mysql);
 //用户注册
-void Register(MYSQL* mysql,User* user);
+int Register(MYSQL* mysql,User* user);
 //用户登录
-void Login(MYSQL* mysql,User* user);
+int Login(MYSQL* mysql,User* user);
 //增加商品信息
 void Insert(MYSQL* mysql,goods* g);
 //查找商品信息
