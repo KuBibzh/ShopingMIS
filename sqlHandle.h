@@ -19,6 +19,8 @@ void SetEncoding(MYSQL* mysql);
 int Register(MYSQL* mysql,User* user);
 //用户登录
 int Login(MYSQL* mysql,User* user);
+//删除普通用户
+int UserDelete(MYSQL* mysql,const char* username);
 //增加商品信息
 void Insert(MYSQL* mysql,goods* g);
 //查找商品信息

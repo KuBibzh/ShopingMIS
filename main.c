@@ -6,7 +6,9 @@
 #include"mysqlCon.h"
 #include"sqlHandle.h"
 void UserLogin();
-void UIDisplay();
+int UIDisplay();
+void UserRegister();
+void UserDel();
 void UIGoods();
 void UICost();
 void GoodsInsert();
@@ -16,20 +18,9 @@ void GoodsSelect();
 MYSQL mysql;
 User user;
 int main(){
-	int n;
 	while(1){
 		UserLogin();
-		UIDisplay();
-		printf("请输入你想要选择的编号\n");
-		scanf("%d",&n);
-		if(n==1){
-			UIGoods();
-		}
-		else if(n==2){
-
-		}
-		else{
-			printf("错误输出\n");
+		if(!UIDisplay()){
 			break;
 		}
 	}
@@ -54,22 +45,95 @@ void UserLogin(){
 		MysqlClose(&mysql);
 	}
 }
-void UIDisplay(){
-	if(strcmp(user.power,"admin")==0){
-		printf("/***********商店管理系统*****************/\n");
-		printf("1.进入商品表界面          2.进入销售表界面\n");
-		printf("3.添加新的普通用户        4.删除普通用户\n");
-		printf("				5.退出程序\n");
+int UIDisplay(){
+	while(1){
+		int n;
+		if(strcmp(user.power,"admin")==0){
+			printf("/***********商店管理系统*****************/\n");
+			printf("1.进入商品表界面          2.进入销售表界面\n");
+			printf("3.添加新的普通用户        4.删除普通用户\n");
+			printf("		5.退出程序\n\n\n");
+			printf("请输入想要的功能序号：");
+			scanf("%d",&n);
+			while(getchar()!='\n');
+			switch(n){
+				case 1:
+					UIGoods();
+					break;
+				case 2:
+					//TODO 销售表UI函数
+					break;
+				case 3:
+					UserRegister();
+					break;
+				case 4:
+					UserDel();
+					break;
+				case 5:
+					return 0;
+				default:
+					printf("一个错误的输入\n");
+					break;
+			}
+		}
+		else{
+			printf("/***********商店管理系统*****************/\n");
+			printf("1.进入商品表界面                2.退出程序\n\n\n");
+			printf("请输入想要的功能序号：");
+			scanf("%d",&n);
+			while(getchar()!='\n');
+			switch(n){
+				case 1:
+					UIGoods();
+					break;
+				case 2:
+					return 0;
+				default:
+					printf("一个错误的输入\n");
+					break;
+			}
+		}		
 	}
-	else{
-		printf("/***********商店管理系统*****************/\n");
-		printf("1.进入商品表界面                2.退出程序\n");
+}
+void UserRegister(){
+	system("clear");
+	User newUser;
+	printf("欢迎来到注册界面\n\n");
+	printf("请输入新用户的账号名：");
+	scanf("%s",newUser.user);
+	getchar();
+	printf("请输入新用户的密码:");
+	scanf("%s",newUser.passwd);
+	MysqlCon(&mysql);
+	SetEncoding(&mysql);
+	if(Register(&mysql,&newUser)){
+		printf("注册失败，用户名重复\n");
+		return;
 	}
+	printf("注册成功\n");
+	MysqlClose(&mysql);
+	sleep(3);
+}
+void UserDel(){
+	system("clear");
+	printf("删除用户功能界面\n\n");
+	char username[20];
+	printf("请输入用户名进行删除：");
+	scanf("%s",username);
+	MysqlCon(&mysql);
+	SetEncoding(&mysql);
+	if(!UserDelete(&mysql,username)){
+		printf("删除失败，不存在此用户\n");
+		sleep(3);
+		return;
+	}
+	MysqlClose(&mysql);
+	printf("删除用户成功\n");
+	sleep(3);
 }
 void UIGoods(){
 	int c;
 	while(1){
-		sleep(2);
 		system("clear");
 		printf("/***********商品表管理*******************/\n");
 		printf("1.增加商品信息              2.删除商品信息\n");

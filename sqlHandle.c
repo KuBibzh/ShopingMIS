@@ -27,6 +27,26 @@ int Login(MYSQL* mysql,User* user){
 	}
 
 }
+int Register(MYSQL* mysql,User* user){
+	char sql[1024];
+	sprintf(sql,"insert into User(username,password) values('%s',md5('%s'))",user->user,user->passwd);
+	if(mysql_query(mysql,sql)){
+		fprintf(stderr, "Failed to insert to User: Error: %s\n",
+				mysql_error(mysql));
+		return 1;
+	}
+	return 0;
+}
+int UserDelete(MYSQL* mysql,const char* username){
+	char sql[1024];
+	sprintf(sql,"delete from User where username='%s' and power='normal'",username);
+	if(mysql_query(mysql,sql)){
+		return 0;
+
+	}
+	return 1;
+
+}
 void Insert(MYSQL* mysql,goods* g){
 	char sql[1024];
 	sprintf(sql,"insert into goods_Info values(%d,'%s','%s',%f,%d)",g->gno,g->name,g->type,g->price,g->count);
