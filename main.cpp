@@ -39,7 +39,7 @@ void UserLogin(){
 		}
 		printf("请输入你的密码：");
 		scanf("%s",user.passwd);
-		if(!std::regex_match(user.passwd,std::regex("^.{6,10}$"))){
+		if(!std::regex_match(user.passwd,std::regex("^.{5,10}$"))){
               printf("密码格式不正确，请重新输入\n");
               continue;
         }
