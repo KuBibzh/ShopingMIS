@@ -12,3 +12,6 @@ void MysqlCon(MYSQL* mysql){
 void MysqlClose(MYSQL* mysql){
 	mysql_close(mysql);
 }
+void SetEncoding(MYSQL* mysql){
+      mysql_query(mysql,"set names utf8");
+}

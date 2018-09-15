@@ -44,7 +44,7 @@ goods* GoodsSelectAll(MYSQL* mysql){
 			return NULL;
 		}
 		else{
-			good_Infos=(goods*)malloc(sizeof(goods)*rows);
+			good_Infos=(goods*)malloc(sizeof(goods)*rows+1);
 		}
 		for(i=0;i<rows;i++){
 			row=mysql_fetch_row(res);
@@ -53,8 +53,8 @@ goods* GoodsSelectAll(MYSQL* mysql){
 			good_Infos[i].count=atoi(row[4]);
 			strcpy(good_Infos[i].name,row[1]);
 			strcpy(good_Infos[i].type,row[2]);
-
 		}
+		good_Infos[i].gno=0;
 
 		mysql_free_result(res);
 
@@ -71,8 +71,11 @@ int GoodsDelete(MYSQL* mysql,int gno){
 	sprintf(sql,"delete from goods_Info where gno=%d",gno);
 	if(mysql_query(mysql,sql)){
 		return 0;
-
 	}
+	if(!mysql_affected_rows(mysql)){
+		return 0;
+	}
+
 	return 1;
 }
 //修改商品信息
@@ -83,6 +86,10 @@ int GoodsUpdate(MYSQL* mysql,int count,int gno){
 		fprintf(stderr,"Failed to Update database:Error:%s\n",mysql_error(mysql));
 		return 0;
 
+	}
+
+	if(!mysql_affected_rows(mysql)){
+		return 0;
 	}
 	return 1;
 }

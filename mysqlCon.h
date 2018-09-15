@@ -6,7 +6,7 @@ void MysqlCon(MYSQL* mysql);
 //关闭数据库
 void MysqlClose(MYSQL* mysql);
 
-
+void SetEncoding(MYSQL* mysql);
 
 
 

@@ -2,33 +2,34 @@
 #include<stdlib.h>
 #include<unistd.h>
 #include<string.h>
-#include<regex>
-#include<iostream>
 #include<mysql/mysql.h>
+#include<iostream>
+#include<regex>
 #include"mysqlCon.h"
-#include"sqlHandle.h"
-void UserLogin();
+#include"userDAO.h"
+#include"goodsDAO.h"
+void main_UserLogin();
 int UIDisplay();
-void UserRegister();
-void UserDel();
+void main_UserRegister();
+void main_UserDelete();
 void UIGoods();
 void UICost();
-void GoodsInsert();
-void GoodsUpdate();
-void GoodsDelete();
-void GoodsSelect();
+void main_GoodsInsert();
+void main_GoodsUpdate();
+void main_GoodsDelete();
+void main_GoodsSelectAll();
 MYSQL mysql;
 User user;
 int main(){
 	while(1){
-		UserLogin();
+		main_UserLogin();
 		if(!UIDisplay()){
 			break;
 		}
 	}
 	return 0;
 }
-void UserLogin(){
+void main_UserLogin(){
 	while(1){
 		printf("请输入你的用户名：");
 		scanf("%s",user.user);
@@ -40,13 +41,13 @@ void UserLogin(){
 		printf("请输入你的密码：");
 		scanf("%s",user.passwd);
 		if(!std::regex_match(user.passwd,std::regex("^.{5,10}$"))){
-              printf("密码格式不正确，请重新输入\n");
-              continue;
-        }
+			printf("密码格式不正确，请重新输入\n");
+			continue;
+		}
 
 		MysqlCon(&mysql);
 		SetEncoding(&mysql);
-		if(Login(&mysql,&user)){
+		if(UserLogin(&mysql,&user)){
 			printf("登录成功\n");
 			printf("用户权限%s\n\n\n\n",user.power);
 			break;
@@ -58,6 +59,7 @@ void UserLogin(){
 }
 int UIDisplay(){
 	while(1){
+		system("clear");
 		int n;
 		if(strcmp(user.power,"admin")==0){
 			printf("/***********商店管理系统*****************/\n");
@@ -75,10 +77,10 @@ int UIDisplay(){
 					//TODO 销售表UI函数
 					break;
 				case 3:
-					UserRegister();
+					main_UserRegister();
 					break;
 				case 4:
-					UserDel();
+					main_UserDelete();
 					break;
 				case 5:
 					return 0;
@@ -106,28 +108,28 @@ int UIDisplay(){
 		}		
 	}
 }
-void UserRegister(){
-	system("clear");
+void main_UserRegister(){
 	User newUser;
 	printf("欢迎来到注册界面\n\n");
 	printf("请输入新用户的账号名：");
 	scanf("%s",newUser.user);
 	getchar();
+
 	if(!std::regex_match(newUser.user,std::regex("^.{4,12}$"))){
-              printf("用户名格式不正确，请重新注册\n");
-              sleep(3);
-			  return;
-    }
+		printf("用户名格式不正确，请重新注册\n");
+		sleep(3);
+		return;
+	}
 	printf("请输入新用户的密码:");
 	scanf("%s",newUser.passwd);
 	if(!std::regex_match(newUser.passwd,std::regex("^.{6,10}$"))){
-              printf("密码格式不正确，请重新输入\n");
-              sleep(3);
-			  return;
-    }
+		printf("密码格式不正确，请重新输入\n");
+		sleep(3);
+		return;
+	}
 	MysqlCon(&mysql);
 	SetEncoding(&mysql);
-	if(Register(&mysql,&newUser)){
+	if(UserRegister(&mysql,&newUser)){
 		printf("注册失败，用户名重复\n");
 		return;
 	}
@@ -135,8 +137,7 @@ void UserRegister(){
 	MysqlClose(&mysql);
 	sleep(3);
 }
-void UserDel(){
-	system("clear");
+void main_UserDelete(){
 	printf("删除用户功能界面\n\n");
 	char username[20];
 	printf("请输入用户名进行删除：");
@@ -164,16 +165,16 @@ void UIGoods(){
 		scanf("%d",&c);
 		switch(c){
 			case 1:
-				GoodsInsert();
+				main_GoodsInsert();
 				break;
 			case 2:
-				GoodsDelete();
+				main_GoodsDelete();
 				break;
 			case 3:
-				GoodsUpdate();
+				main_GoodsUpdate();
 				break;
 			case 4:
-				GoodsSelect();
+				main_GoodsSelectAll();
 				break;
 			case 5:
 				return;
@@ -183,10 +184,8 @@ void UIGoods(){
 		}
 	}
 }
-void GoodsInsert(){
+void main_GoodsInsert(){
 	goods g;
-	//printf("请输入商品编号，名字，类别，价钱，数量\n");
-	//scanf("%d %s %s %d %d",&g.gno,g.name,g.type,&g.price,&g.count);
 	printf("商品编号：");
 	scanf("%d",&g.gno);
 	printf("商品名字：");
@@ -201,30 +200,66 @@ void GoodsInsert(){
 	scanf("%d",&g.count);
 	MysqlCon(&mysql);
 	SetEncoding(&mysql);
-	Insert(&mysql,&g);
+	if(GoodsInsert(&mysql,&g)){
+		printf("物品添加成功!\n");
+	}
+	else
+		printf("商品编号重复!\n");
 	MysqlClose(&mysql);
+	sleep(3);
 }
-void GoodsUpdate(){
+void main_GoodsUpdate(){
 	int count,gno;
-	printf("请输入要水果的数量和对应的编号\n");
-	scanf("%d %d",&count,&gno);
+	printf("欢迎来到修改商品信息界面：\n");
+	printf("输入需要修改的水果编号\n");
+	scanf("%d",&count);
+	while(getchar()!='\n');
+	printf("修改后的水果数量\n");
+	scanf("%d",&count);
+	while(getchar()!='\n');
 	MysqlCon(&mysql);
 	SetEncoding(&mysql);
-	Update(&mysql,count,gno);
+	if(GoodsUpdate(&mysql,count,gno))
+		printf("更新商品信息成功!\n");
+	else
+		printf("没有此商品!\n");
 	MysqlClose(&mysql);
+	sleep(3);
 }
-void GoodsDelete(){
+void main_GoodsDelete(){
 	int gno;
 	printf("请输入要删除信息的水果编号\n");
 	scanf("%d",&gno);
 	MysqlCon(&mysql);
 	SetEncoding(&mysql);
-	Delete(&mysql,gno);
+	if(GoodsDelete(&mysql,gno)){
+		printf("商品删除成功\n");
+	}
+	else
+		printf("没有此编号的商品\n");
 	MysqlClose(&mysql);
+	sleep(3);
 }
-void GoodsSelect(){
+void main_GoodsSelectAll(){
+	int i=0;
 	MysqlCon(&mysql);
 	SetEncoding(&mysql);
-	Select(&mysql);
+	goods* good_Infos;
+	good_Infos=GoodsSelectAll(&mysql);
 	MysqlClose(&mysql);
+	if(good_Infos==NULL){
+		printf("没有商品信息！\n");
+		return;
+	}	
+	for(i=0;i<good_Infos[i].gno!=0;i++){
+		printf("所有商品信息：\n");
+		printf("第%d种商品：\n",i);
+		printf("商品ID:%d\n",good_Infos[i].gno);		
+		printf("商品名字:%s\n",good_Infos[i].name);
+		printf("商品类别:%s\n",good_Infos[i].type);
+		printf("商品价格:%f\n",good_Infos[i].price);
+		printf("商品数量:%d\n",good_Infos[i].count);
+	}
+	//TODO 可以添加键盘点击时间进行结束查看信息
+	sleep(5);
 }
